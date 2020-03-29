@@ -2611,6 +2611,22 @@ class TestCustomBusinessDay(Base):
         self.offset1 = self.offset
         self.offset2 = CDay(2)
 
+    @pytest.mark.filterwarnings("ignore:Non:pandas.errors.PerformanceWarning")
+    def test_holiday_integration(self):
+        US_BD = CustomBusinessDay(calendar=USFederalHolidayCalendar())
+        friday_date1 = datetime(2016, 12, 30)
+        friday_date2 = datetime(1977, 12, 30)
+        thursday_date1 = datetime(2010, 12, 30)
+        thursday_date2 = datetime(1982, 12, 30)
+
+        # We are skipping Monday because holiday (NewYears) is on Sunday
+        assert friday_date1 + US_BD == datetime(2017, 1, 3)
+        assert friday_date2 + US_BD == datetime(1978, 1, 3)
+
+        # We are skipping Friday because holiday (NewYears) is on Saturday
+        assert thursday_date1 + US_BD == datetime(2011, 1, 3)
+        assert thursday_date2 + US_BD == datetime(1983, 1, 3)
+
     def test_different_normalize_equals(self):
         # GH#21404 changed __eq__ to return False when `normalize` does not match
         offset = self._offset()
